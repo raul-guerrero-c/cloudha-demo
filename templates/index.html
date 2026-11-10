@@ -1,0 +1,659 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CloudHA Manager | Panel de inventario</title>
+    <style>
+        :root {
+            --navy: #172c49;
+            --navy-dark: #102039;
+            --blue: #2563eb;
+            --blue-light: #eff6ff;
+            --bg: #f3f6fb;
+            --white: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --green: #059669;
+            --amber: #b45309;
+            --shadow: 0 5px 24px rgba(18, 38, 63, .06);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .topbar {
+            background: linear-gradient(110deg, var(--navy-dark), var(--navy));
+            color: white;
+            padding: 20px max(24px, calc((100% - 1160px) / 2));
+        }
+
+        .topbar-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 46px;
+            height: 46px;
+            border-radius: 13px;
+            background: #ffffff1a;
+            color: #a9d3ff;
+            font-size: 25px;
+        }
+
+        .brand h1 {
+            font-size: 21px;
+            margin: 0;
+            letter-spacing: -.5px;
+        }
+
+        .brand p {
+            margin: 3px 0 0;
+            color: #b9c9df;
+            font-size: 12px;
+        }
+
+        .online {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #ffffff26;
+            background: #ffffff10;
+            border-radius: 40px;
+            padding: 9px 13px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #34d399;
+            border-radius: 50%;
+        }
+
+        .container {
+            max-width: 1208px;
+            margin: auto;
+            padding: 32px 24px 50px;
+        }
+
+        .intro {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .intro h2 {
+            margin: 0 0 6px;
+            font-size: 27px;
+            letter-spacing: -.7px;
+            color: var(--navy);
+        }
+
+        .intro p {
+            color: var(--muted);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .tag {
+            background: #e1eeff;
+            color: #1d4ed8;
+            font-weight: 600;
+            border-radius: 9px;
+            padding: 11px 13px;
+            font-size: 12px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 17px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid #e9eef5;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card { padding: 22px; }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: var(--blue-light);
+            color: var(--blue);
+            font-size: 23px;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-size: 29px;
+            font-weight: 750;
+            color: var(--navy);
+            letter-spacing: -.9px;
+            margin-top: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .stat-caption {
+            color: #94a3b8;
+            font-size: 11px;
+            margin-top: 7px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .panel { padding: 24px; }
+
+        .panel-title {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .panel-title h3 {
+            margin: 0 0 6px;
+            color: var(--navy);
+            font-size: 17px;
+        }
+
+        .panel-title p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .count {
+            color: var(--blue);
+            background: var(--blue-light);
+            padding: 6px 9px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .search {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            margin-bottom: 18px;
+            font: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search:focus,
+        input:focus {
+            border-color: #93b4fa;
+            box-shadow: 0 0 0 3px #2563eb12;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            background: #f8fafd;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 13px 12px;
+        }
+
+        td {
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:last-child td { border-bottom: 0; }
+
+        .product-name { font-weight: 600; }
+
+        .stock {
+            display: inline-block;
+            border-radius: 6px;
+            padding: 5px 8px;
+            background: #ecfdf5;
+            color: #047857;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .stock.low {
+            background: #fffbeb;
+            color: var(--amber);
+        }
+
+        .stock.zero {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .empty {
+            color: var(--muted);
+            text-align: center;
+            padding: 35px 10px;
+            font-size: 13px;
+        }
+
+        .field { margin-bottom: 17px; }
+
+        label {
+            display: block;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .field input {
+            display: block;
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: white;
+            color: var(--text);
+            font: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 13px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            background: var(--blue);
+            color: white;
+            border: 0;
+            border-radius: 9px;
+            font: inherit;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .btn:hover { background: #1d4ed8; }
+
+        .infrastructure {
+            margin-top: 22px;
+            padding: 22px 24px;
+        }
+
+        .infra-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            gap: 10px;
+        }
+
+        .infra-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--navy);
+        }
+
+        .infra-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .infra-item {
+            background: #f7f9fd;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 0;
+        }
+
+        .infra-item span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 7px;
+        }
+
+        .infra-item strong {
+            display: block;
+            font-size: 12px;
+            color: var(--navy);
+            overflow-wrap: anywhere;
+        }
+
+        .status-good { color: var(--green) !important; }
+
+        footer {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            padding-top: 26px;
+        }
+
+        @media (max-width: 850px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 22px 14px 35px; }
+            .topbar { padding: 17px 15px; }
+            .brand h1 { font-size: 17px; }
+            .intro h2 { font-size: 23px; }
+            .stats { gap: 9px; }
+            .stat-card { padding: 15px 12px; }
+            .stat-value { font-size: 21px; }
+            .stat-label { font-size: 11px; }
+            .stat-caption { font-size: 10px; }
+            .panel { padding: 19px 15px; }
+            .infra-grid { grid-template-columns: 1fr; }
+            .tag { display: none; }
+            .online { font-size: 10px; padding: 7px 9px; }
+        }
+
+        @media (max-width: 380px) {
+            .stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    {% set resumen = namespace(unidades=0, valor=0) %}
+    {% for producto in productos %}
+        {% set resumen.unidades =
+            resumen.unidades + producto.existencia %}
+        {% set resumen.valor =
+            resumen.valor + (producto.precio * producto.existencia) %}
+    {% endfor %}
+
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <div class="brand-icon">&#9729;</div>
+                <div>
+                    <h1>CloudHA Manager</h1>
+                    <p>Inventario · AWS Cloud</p>
+                </div>
+            </div>
+            <div class="online">
+                <span class="dot"></span>
+                Sistema activo
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="intro">
+            <div>
+                <h2>Panel de inventario</h2>
+                <p>Administración y seguimiento de productos</p>
+            </div>
+            <span class="tag">Cloud Dashboard</span>
+        </div>
+
+        <section class="stats">
+            <div class="card stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Productos registrados</span>
+                    <span class="stat-icon">&#9638;</span>
+                </div>
+                <div class="stat-value">{{ productos|length }}</div>
+                <div class="stat-caption">Productos en la base de datos</div>
+            </div>
+
+            <div class="card stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Unidades disponibles</span>
+                    <span class="stat-icon">&#9776;</span>
+                </div>
+                <div class="stat-value">{{ resumen.unidades }}</div>
+                <div class="stat-caption">Existencias totales</div>
+            </div>
+
+            <div class="card stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Valor del inventario</span>
+                    <span class="stat-icon">$</span>
+                </div>
+                <div class="stat-value">
+                    ${{ "{:,.2f}".format(resumen.valor) }}
+                </div>
+                <div class="stat-caption">Valor total estimado · MXN</div>
+            </div>
+        </section>
+
+        <div class="content-grid">
+            <section class="card panel">
+                <div class="panel-title">
+                    <div>
+                        <h3>Productos registrados</h3>
+                        <p>Consulta el inventario almacenado en MySQL</p>
+                    </div>
+                    <span class="count">{{ productos|length }} productos</span>
+                </div>
+
+                <input
+                    id="busqueda"
+                    class="search"
+                    type="search"
+                    placeholder="Buscar un producto..."
+                    aria-label="Buscar productos"
+                    oninput="filtrarProductos()"
+                >
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Existencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-productos">
+                            {% for producto in productos %}
+                            <tr class="producto-row">
+                                <td class="product-name">
+                                    {{ producto.nombre }}
+                                </td>
+                                <td>
+                                    ${{ "{:,.2f}".format(producto.precio) }}
+                                </td>
+                                <td>
+                                    <span class="stock
+                                        {% if producto.existencia == 0 %}
+                                            zero
+                                        {% elif producto.existencia <= 5 %}
+                                            low
+                                        {% endif %}
+                                    ">
+                                        {{ producto.existencia }} uds.
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="empty">
+                                    Todavía no hay productos registrados.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <p id="sin-resultados" class="empty" hidden>
+                        No se encontraron productos.
+                    </p>
+                </div>
+            </section>
+
+            <section class="card panel">
+                <div class="panel-title">
+                    <div>
+                        <h3>Nuevo producto</h3>
+                        <p>Registra un artículo en el inventario</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="/productos">
+                    <div class="field">
+                        <label for="nombre">Nombre del producto</label>
+                        <input
+                            id="nombre"
+                            name="nombre"
+                            type="text"
+                            placeholder="Ej. Monitor 24 pulgadas"
+                            maxlength="120"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="precio">Precio (MXN)</label>
+                            <input
+                                id="precio"
+                                name="precio"
+                                type="number"
+                                min="0"
+                                max="99999999.99"
+                                step="0.01"
+                                placeholder="0.00"
+                                required
+                            >
+                        </div>
+                        <div class="field">
+                            <label for="existencia">Existencia</label>
+                            <input
+                                id="existencia"
+                                name="existencia"
+                                type="number"
+                                min="0"
+                                step="1"
+                                placeholder="0"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <button class="btn" type="submit">
+                        + Guardar producto
+                    </button>
+                </form>
+            </section>
+        </div>
+
+        <section class="card infrastructure">
+            <div class="infra-header">
+                <h3>Estado de la infraestructura</h3>
+                <span class="count">Información de la solicitud</span>
+            </div>
+
+            <div class="infra-grid">
+                <div class="infra-item">
+                    <span>Servidor que atendió la solicitud</span>
+                    <strong>{{ servidor }}</strong>
+                </div>
+                <div class="infra-item">
+                    <span>Base de datos</span>
+                    <strong class="status-good">
+                        MySQL · Consulta exitosa
+                    </strong>
+                </div>
+                <div class="infra-item">
+                    <span>Estado del aplicativo</span>
+                    <strong class="status-good">
+                        &#9679; Disponible
+                    </strong>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            CloudHA Manager · Demostración académica de
+            alta disponibilidad en AWS
+        </footer>
+    </main>
+
+    <script>
+        function filtrarProductos() {
+            const busqueda = document.getElementById("busqueda")
+                .value.toLocaleLowerCase().trim();
+
+            const filas = document.querySelectorAll(".producto-row");
+            let visibles = 0;
+
+            filas.forEach(fila => {
+                const nombre = fila.querySelector(".product-name")
+                    .textContent.toLocaleLowerCase();
+
+                const mostrar = nombre.includes(busqueda);
+                fila.hidden = !mostrar;
+                visibles += mostrar ? 1 : 0;
+            });
+
+            document.getElementById("sin-resultados").hidden =
+                filas.length === 0 || visibles > 0;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+
+# Entorno virtual de Python
+.venv/
+venv/
+
+# Archivos generados por Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Configuración local y credenciales
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Archivos temporales
+.vscode/
+.idea/
+
+# Vista previa local
+preview.py
+
+# Script de despliegue provisional
+user-data.sh
