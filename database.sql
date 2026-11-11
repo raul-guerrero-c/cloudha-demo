@@ -1,5 +1,5 @@
 
-CREATE DATABASE IF NOT EXISTS cloudha;
+CREATE DATABASE IF NOT EXISTS cloudha_db;
 
 USE cloudha;
 
