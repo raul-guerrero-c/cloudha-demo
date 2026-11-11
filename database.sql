@@ -1,7 +1,6 @@
-
 CREATE DATABASE IF NOT EXISTS cloudha_db;
 
-USE cloudha;
+USE cloudha_db;
 
 CREATE TABLE IF NOT EXISTS productos (
     id INT AUTO_INCREMENT PRIMARY KEY,

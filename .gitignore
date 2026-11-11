@@ -21,6 +21,3 @@ __pycache__/
 
 # Vista previa local
 preview.py
-
-# Script de despliegue provisional
-user-data.sh
